@@ -17,14 +17,11 @@ $error_mensaje = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // Incluir la conexión a la BD
     require 'db.php';
     
-    // 1. Obtener y limpiar datos del formulario
     $email = trim($_POST['email']);
     $password_ingresada = trim($_POST['password']);
 
-    // 2. Validar que no estén vacíos
     if (empty($email) || empty($password_ingresada)) {
         $error_mensaje = "Por favor, completa todos los campos.";
     } else {
@@ -32,29 +29,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $db = conectarDB();
             
-            // 3. Preparar la consulta 
             $stmt = $db->prepare("SELECT * FROM Clientes WHERE email = ?");
             $stmt->execute([$email]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // 4. Verificar si el usuario existe
             if ($usuario) {
                 
-                // 5. Verificar la contraseña
                 // =========================================================
-                // MÉTODO CORRECTO (cuando uses password_hash() al registrar)
-                // if (password_verify($password_ingresada, $usuario['Password'])) {
+                // ¡CAMBIO IMPORTANTE!
+                // Ahora usamos password_verify() para comparar la contraseña
+                // ingresada con el HASH guardado en la base de datos.
                 // =========================================================
+                if (password_verify($password_ingresada, $usuario['passwd'])) {
 
-                // MÉTODO INSEGURO (Solo para tus datos de prueba actuales)
-                if ($password_ingresada === $usuario['passwd']) {
-
-                    // 6. ¡Login Exitoso! Guardar en Sesión
+                    // ¡Login Exitoso! Guardar en Sesión
                     session_regenerate_id(); // Regenera ID por seguridad
                     $_SESSION['usuario_id'] = $usuario['id'];
                     $_SESSION['rol'] = $usuario['rol'];
                     
-                    // 7. Redirigir al usuario
                     header('Location: index.php');
                     exit;
 
@@ -73,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // ===============================================
 // 3. RENDERIZADO DEL HTML (LA VISTA)
+// (El HTML de tu login.php se queda exactamente igual)
 // ===============================================
 ?>
 <!DOCTYPE html>
