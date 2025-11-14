@@ -5,27 +5,27 @@
 -- 1. Selecciona la base de datos
 USE tsic2;
 
--- 2. Insertar Usuarios de Ejemplo
+-- 2. Insertar Usuarios de Ejemplo 
 INSERT INTO Clientes (email, passwd, rol) 
 VALUES 
-('admin@tienda.com', 'admin123', 1),  -- Usuario Admin
-('cliente@correo.com', 'cliente123', 0); -- Usuario Cliente
+('admin@tienda.com', '$2y$10$zFZKgQD2Udd0.EUjpIoPducxNSsIH5x7TbhotC94xs3tDE/Zb1Xci', 1),  -- Usuario Admin
+('cliente@correo.com', '$2y$10$mEHkYR0tc04bEZY9g4yXoOWwOsZF3SRxTlFHh3SaxQ.ocmR/sJxZS', 0); -- Usuario Cliente
 
 
-INSERT INTO Productos (nombre, imagen) 
+INSERT INTO Productos (nombre,categoria,imagen) 
 VALUES 
-('Playera azul', 'src/img/playeras/playeraAzul.jpg'), 
-('Playera Deportiva 1', 'src/img/playeras/playeraDeportiva1.jpeg'),
-('Playera Elegante 1', 'src/img/playeras/playeraElegante1.jpeg'),
-('Playera Elegante 2', 'src/img/playeras/playeraElegante2.jpeg'),
-('Playera negra', 'src/img/playeras/playeraNegra.jpeg'),
-('Playera roja', 'src/img/playeras/playeraRoja.jpeg'),
-('Chamarra negra con cuero', 'src/img/chamarras/chamarraNegraHombre.jpeg'),
-('Chamarra verde abrigada', 'src/img/chamarras/chamarraVerdeHombre.jpeg'),
-('Chamarra vino impermeable', 'src/img/chamarras/chamarraVinoHombre.jpeg'),
-('Pantalon de mezclilla clasico', 'src/img/pantalones/mezclillaAzulHombre.jpeg'),
-('Pantalon crema estilo pants', 'src/img/pantalones/pantalonCremaHombre.jpeg'),
-('Pantalon verde multibolsa', 'src/img/pantalones/pantalonVerdeHombre.jpeg');
+('Playera azul','Playeras', 'playeras/playeraAzul.jpg'), 
+('Playera Deportiva 1','Playeras', 'playeras/playeraDeportiva1.jpeg'),
+('Playera Elegante 1','Playeras', 'playeras/playeraElegante1.jpeg'),
+('Playera Elegante 2','Playeras', 'playeras/playeraElegante2.jpeg'),
+('Playera negra','Playeras', 'playeras/playeraNegra.jpeg'),
+('Playera roja','Playeras', 'playeras/playeraRoja.jpeg'),
+('Chamarra negra con cuero','Chamarras', 'chamarras/chamarraNegraHombre.jpeg'),
+('Chamarra verde abrigada','Chamarras', 'chamarras/chamarraVerdeHombre.jpeg'),
+('Chamarra vino impermeable','Chamarras', 'chamarras/chamarraVinoHombre.jpeg'),
+('Pantalon de mezclilla clasico','Pantalones', 'pantalones/mezclillaAzulHombre.jpeg'),
+('Pantalon crema estilo pants','Pantalones', 'pantalones/pantalonCremaHombre.jpeg'),
+('Pantalon verde multibolsa','Pantalones', 'pantalones/pantalonVerdeHombre.jpeg');
 
 
 INSERT INTO Variantes (producto_id, talla, precio, stock)

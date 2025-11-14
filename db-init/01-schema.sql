@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS Productos; -- Borra la tabla si ya existe
 CREATE TABLE Productos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
+    categoria VARCHAR(100) NOT NULL,
     imagen VARCHAR(255) NULL
 );
 

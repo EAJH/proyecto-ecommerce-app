@@ -1,3 +1,43 @@
+<?php
+// ===============================================
+// 1. INICIAR Y CONECTAR
+// ===============================================
+session_start();
+require 'db.php';
+$db = conectarDB();
+
+// ===============================================
+// 2. LEER DATOS DE LOS FORMULARIOS (GET)
+// ===============================================
+// Leemos los valores de la URL, si no existen, los dejamos vacíos.
+$filtro_categoria = $_GET['categoria'] ?? '';
+$busqueda_nombre = $_GET['busqueda'] ?? '';
+
+// ===============================================
+// 3. CONSTRUIR LA CONSULTA DINÁMICA
+// ===============================================
+$sql = "SELECT * FROM Productos WHERE 1=1";
+$params = []; // Array para los valores
+
+// AÑADIR FILTRO DE CATEGORÍA
+// El usuario puede seleccionar "Playeras" Y buscar "azul"
+if (!empty($filtro_categoria)) {
+    $sql .= " AND categoria = ?";
+    $params[] = $filtro_categoria;
+}
+
+// AÑADIR FILTRO DE BÚSQUEDA
+if (!empty($busqueda_nombre)) {
+    $sql .= " AND nombre LIKE ?";
+    $params[] = "%" . $busqueda_nombre . "%";
+}
+
+// Preparar y ejecutar la consulta
+$stmt = $db->prepare($sql);
+$stmt->execute($params);
+$productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,17 +49,12 @@
 <body>
     
     <header class="header inicio">
-
         <div class="contenedor contenido-header">
-
             <div class="barra">
                 <a href="index.php" class="logo">
-                   <!--Imagen del logo-->
                    <img src="build/img/iconos/logo.webp" alt="Logo de la tienda">
                 </a>
-
                 <h1>Tienda de ropa Online para hombres</h1>
-
                 <nav class="navegacion">
                     <div class="iconos-header">
                         <div class="icono">
@@ -27,425 +62,120 @@
                                 <img src="build/img/iconos/carrito-compras.svg" alt="Carrito de compras" loading="lazy">
                             </a>
                         </div>
-                        
                         <div class="icono">
                             <a href="inventario.php">
                                 <img src="build/img/iconos/estrella.svg" alt="Inventario" loading="lazy">
                             </a>
                         </div>
-                        
                         <div class="icono">
-                            <a href="login.php">
-                                <img src="build/img/iconos/user.svg" alt="Login" loading="lazy">
-                            </a>
+                            <?php if (isset($_SESSION['usuario_id'])): ?>
+                                <a href="logout.php" title="Cerrar Sesión">
+                                    <img src="build/img/iconos/user-logout.svg" alt="Logout" loading="lazy">
+                                </a>
+                            <?php else: ?>
+                                <a href="login.php" title="Iniciar Sesión">
+                                    <img src="build/img/iconos/user.svg" alt="Login" loading="lazy">
+                                </a>
+                            <?php endif; ?>
                         </div>
-
-                    </div> <!-- fin iconos navegacion -->
+                    </div>
                 </nav> 
-
-            </div> <!-- fin barra -->
-
-        </div> <!-- fin contenedor del header -->
-
+            </div>
+        </div>
         <p class="slogan">Tu estilo, a un clic.</p>
+    </header>
 
-    </header> <!-- fin del header -->
-
-
-
-    <!--Barra de busquedas después del header -->
     <section class="contenido-barra-busqueda">
-
-        <!--PONER FUNCIONAMIENTO CON JS-->
-        <div class="filtro">
-            <img src="build/img/iconos/filter.svg" alt="Filtro de navegación">
-            <form class="form">
-                <label for="filtro">Filtro para productos</label>
-                <select  id="opciones">
-                    <option value="" disabled selected> -- Seleccione --</option>
-                    <option value="playeras">Playeras</option>
-                    <option value="chamarras">Chamarras</option>
-                    <option value="pantalones">Pantalones</option>
+        
+        <form action="productos.php" method="GET" class="form-busqueda-combinada">
+            
+            <div class="campo-filtro">
+                <label for="categoria">Categoría</label>
+                <select name="categoria" id="categoria">
+                    <option value="">-- Todas --</option>
+                    <option value="Playeras" <?php echo ($filtro_categoria === 'Playeras') ? 'selected' : ''; ?>>Playeras</option>
+                    <option value="Chamarras" <?php echo ($filtro_categoria === 'Chamarras') ? 'selected' : ''; ?>>Chamarras</option>
+                    <option value="Pantalones" <?php echo ($filtro_categoria === 'Pantalones') ? 'selected' : ''; ?>>Pantalones</option>
                 </select>
-                <input type="submit" value="Filtrar" class="boton boton-verde">
-            </form>
-        </div> <!-- fin filtro -->
+            </div>
 
-        <div class="barra-busqueda">
-            <img src="build/img/iconos/search.svg" alt="Barra de búsqueda">
-            <!--<p>Barra de búsqueda</p>-->
-            <form class="form">
-                <label for="busqueda">Búsqueda</label>
-                <input type="text" placeholder="Buscar" id="busqueda">
-                <input type="submit" value="Buscar" class="boton boton-verde">
-            </form>
-        </div> <!-- fin barra-busqueda -->
+            <div class="campo-busqueda">
+                <label for="busqueda">Producto</label>
+                <input type="text" placeholder="Buscar por nombre..." id="busqueda" name="busqueda" value="<?php echo htmlspecialchars($busqueda_nombre); ?>">
+            </div>
 
-       
-        <!--
-        <div class="boton boton-amarillo">
+            <input type="submit" value="Buscar" class="boton-buscar boton boton-verde">
+        
+        </form>
 
-        </div>  fin boton-amarillo -->
-    </section> <!-- fin de la sección de la barra de búsqueda -->
-
-
+    </section>
 
     <main class="main-productos">
         <h2>Productos en venta</h2>
         <div class="contenedor-productos">
-             <!---------------------- PLAYERAS --------------------->
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/playeras/playeraAzul.webp" type="image/webp">
-                    <source srcset="build/img/playeras/playeraAzul.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/playeras/playeraAzul.jpg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Playera azul</h3>
-                    <p>Playera azul sencilla, de manga corta y cuello redondo.</p>
-                    <p class="precio">$150.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
+            
+            <?php if (empty($productos)): ?>
+                <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+            <?php else: ?>
+                <?php foreach ($productos as $producto): ?>
+                    
+                    <?php
+                    // Obtenemos las variantes (tallas y precios) para este producto
+                    $stmt_variantes = $db->prepare("
+                        SELECT talla, precio, id AS variante_id 
+                        FROM Variantes 
+                        WHERE producto_id = ? 
+                        ORDER BY precio ASC
+                    ");
+                    $stmt_variantes->execute([$producto['id']]);
+                    $variantes = $stmt_variantes->fetchAll(PDO::FETCH_ASSOC);
 
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/playeras/playeraDeportiva1.webp" type="image/webp">
-                    <source srcset="build/img/playeras/playeraDeportiva1.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/playeras/playeraDeportiva1.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Playera Deportiva 1</h3>
-                    <p>Playera deportiva sencilla, de manga corta y cuello redondo.</p>
-                    <p class="precio">$250.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
+                    // Obtenemos el precio más bajo para mostrarlo
+                    $precio_display = !empty($variantes) ? $variantes[0]['precio'] : 0.00;
+                    
+                    // ===============================================
+                    // LÓGICA DE RUTAS DE IMAGEN (CORREGIDA)
+                    // ===============================================
+                    // 1. La ruta de la imagen desde la BD (ej. 'playeras/playera_azul.jpg')
+                    $ruta_imagen_db = htmlspecialchars($producto['imagen']);
+                    
+                    // 2. Quitamos la extensión .jpg o .jpeg para poder añadir .webp
+                    $ruta_sin_extension = str_replace(['.jpg', '.jpeg'], '', $ruta_imagen_db);
+                    
+                    // 3. Creamos las rutas finales
+                    $ruta_webp = "build/img/" . $ruta_sin_extension . ".webp";
+                    $ruta_original = "build/img/" . $ruta_imagen_db;
+                    ?>
 
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/playeras/playeraElegante1.webp" type="image/webp">
-                    <source srcset="build/img/playeras/playeraElegante1.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/playeras/playeraElegante1.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Playera Elegante 1</h3>
-                    <p>Playera elegante sencilla, estilo polo. De manga corta y cuello formal.</p>
-                    <p class="precio">$200.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
+                    <div class="producto">
+                        <picture>
+                            <source srcset="<?php echo $ruta_webp; ?>" type="image/webp">
+                            <source srcset="<?php echo $ruta_original; ?>" type="image/jpeg">
+                            <img loading="lazy" src="<?php echo $ruta_original; ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>">
+                        </picture>
+                        <div class="contenido-producto">
+                            <h3><?php echo htmlspecialchars($producto['nombre']); ?></h3>
+                            <p><?php echo htmlspecialchars($producto['descripcion'] ?? 'Descripción no disponible'); ?></p>
+                            <p class="precio">$<?php echo htmlspecialchars($precio_display); ?></p>
+                            
+                            <form action="agregar_carrito.php" method="POST">
+                                <label for="talla-<?php echo $producto['id']; ?>">Talla:</label>
+                                <select name="variante_id" id="talla-<?php echo $producto['id']; ?>" required>
+                                    <option value="" disabled selected>-- Seleccionar Talla --</option>
+                                    <?php foreach ($variantes as $variante): ?>
+                                        <option value="<?php echo $variante['variante_id']; ?>">
+                                            <?php echo htmlspecialchars($variante['talla']); ?> ($<?php echo htmlspecialchars($variante['precio']); ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <input type="submit" value="Añadir al carrito" class="boton boton-amarillo">
+                            </form>
+                        </div> 
+                    </div> 
+                <?php endforeach; ?>
+            <?php endif; ?>
 
-
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/playeras/playeraElegante2.webp" type="image/webp">
-                    <source srcset="build/img/playeras/playeraElegante2.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/playeras/playeraElegante2.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Playera Elegante 2</h3>
-                    <p>Playera elegante sencilla, estilo polo. De manga corta y cuello formal.</p>
-                    <p class="precio">$200.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/playeras/playeraNegra.webp" type="image/webp">
-                    <source srcset="build/img/playeras/playeraNegra.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/playeras/playeraNegra.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Playera negra</h3>
-                    <p>Playera azul sencilla, de manga corta y cuello redondo.</p>
-                    <p class="precio">$150.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/playeras/playeraRoja.webp" type="image/webp">
-                    <source srcset="build/img/playeras/playeraRoja.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/playeras/playeraRoja.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Playera roja</h3>
-                    <p>Playera roja sencilla, de manga corta y cuello redondo.</p>
-                    <p class="precio">$150.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-            <!---------------------- CHAMARRAS --------------------->
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/chamarras/chamarraNegraHombre.webp" type="image/webp">
-                    <source srcset="build/img/chamarras/chamarraNegraHombre.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/chamarras/chamarraNegraHombre.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Chamarra negra con cuero</h3>
-                    <p>Chamarra negra con cuero y algodón en las mangas, estilo universitario.</p>
-                    <p class="precio">$500.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/chamarras/chamarraVerdeHombre.webp" type="image/webp">
-                    <source srcset="build/img/chamarras/chamarraVerdeHombre.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/chamarras/chamarraVerdeHombre.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Chamarra verde abrigada</h3>
-                    <p>Chamarra verde abrigada con mezclilla, estilo invernal.</p>
-                    <p class="precio">$600.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/chamarras/chamarraVinoHombre.webp" type="image/webp">
-                    <source srcset="build/img/chamarras/chamarraVinoHombre.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/chamarras/chamarraVinoHombre.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Chamarra vino impermeable</h3>
-                    <p>Chamarra vino impermeable, especial para época de lluvia.</p>
-                    <p class="precio">$400.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-
-            <!---------------------- PANTALONES --------------------->
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/pantalones/mezclillaAzulHombre.webp" type="image/webp">
-                    <source srcset="build/img/chamarras/mezclillaAzulHombre.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/pantalones/mezclillaAzulHombre.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Pantalón de mezclilla clásico</h3>
-                    <p>Pantalón de mezclilla delgada color azul. Corte recto.</p>
-                    <p class="precio">$250.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/pantalones/pantalonCremaHombre.webp" type="image/webp">
-                    <source srcset="build/img/chamarras/pantalonCremaHombre.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/pantalones/pantalonCremaHombre.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Pantalón crema estilo pants.</h3>
-                    <p>Pantalón crema estilo pants. Ideal para comodidad y agilidad.</p>
-                    <p class="precio">$350.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-
-            <div class="producto">
-                <picture>
-                    <source srcset="build/img/pantalones/pantalonVerdeHombre.webp" type="image/webp">
-                    <source srcset="build/img/chamarras/pantalonVerdeHombre.jpeg" type="image/jpeg">
-                    <img loading="lazy" src="build/img/pantalones/pantalonVerdeHombre.jpeg" alt="producto">
-                </picture>
-                <div class="contenido-producto">
-                    <h3>Pantalón verde multibolsa.</h3>
-                    <p>Pantalón verde estilo pants / cargo. Contiene múltiples bolsas.</p>
-                    <p class="precio">$200.00</p>
-                    <ul class="productos-tallas">
-                        <li>
-                            <p>Chica</p>
-                        </li>
-                        <li>
-                            <p>Mediana</p>
-                        </li>
-                        <li>
-                            <p>Grande</p>
-                        </li>
-                    </ul>
-                    <!-- AÑADIR LA FUNCIONALIDAD DE AUMENTAR EL CONTADOR EN LA PÁGINA DE CARRITO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-                    <a href="productos.php" class="boton boton-amarillo">
-                        Añadir al carrito / Wishlist
-                    </a>
-                </div> <!-- fin contenido-producto -->
-            </div> <!-- fin producto -->
-
-
-        </div> <!-- fin contenedor-productos -->
-
-    </main>
-
-
+        </div> </main>
 
     <footer class="footer">
         <p class="copyright">Todos los derechos reservados. Juárez Herrera Erick Adrián &copy; </p>
