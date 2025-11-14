@@ -63,14 +63,18 @@ if (!$variante) {
 </head>
 <body>
     <header>
-        <h1>Editar Variante</h1>
-        <a href="inventario.php">Volver al Inventario</a>
+        <div class="header-inventario">
+            <h1>Editar Variante</h1>
+            <div class="header-navegacion">
+               <a href="inventario.php">Volver al Inventario</a>
+            </div>
+        </div>    
     </header>
 
     <main>
         <h2>Producto: <?php echo htmlspecialchars($variante['producto_nombre']); ?></h2>
 
-        <form action="editar-variante.php?id=<?php echo $variante_id; ?>" method="POST">
+        <form class="formulario-login" action="editar-variante.php?id=<?php echo $variante_id; ?>" method="POST">
             
             <?php if (!empty($error_mensaje)): ?>
                 <div class="alerta error"><?php echo $error_mensaje; ?></div>
@@ -89,8 +93,12 @@ if (!$variante) {
                 <input type="number" id="stock" name="stock" value="<?php echo htmlspecialchars($variante['stock']); ?>" required>
             </div>
 
-            <button type="submit">Actualizar Variante</button>
+            <button class="boton boton-amarillo" type="submit">Actualizar Variante</button>
         </form>
     </main>
+
+    <footer class="footer-sesion">
+        <p class="copyright">Todos los derechos reservados. Juárez Herrera Erick Adrián &copy; </p>
+    </footer>
 </body>
 </html>

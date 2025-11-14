@@ -87,7 +87,7 @@ $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <section class="contenido-barra-busqueda">
         
-        <form action="productos.php" method="GET" class="form-busqueda-combinada">
+        <form action="productos.php" method="GET" class="form-busqueda-combinada form">
             
             <div class="campo-filtro">
                 <label for="categoria">Categoría</label>

@@ -64,12 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </head>
 <body>
     <header>
-        <h1>Crear Nuevo Producto</h1>
-        <a href="inventario.php">Volver al Inventario</a>
+        <div class="header-inventario">
+            <h1>Crear Nuevo Producto</h1>
+            <div class="header-navegacion">
+                <a href="inventario.php">Volver al Inventario</a>
+            </div>
+        </div>
     </header>
 
     <main>
-        <form action="crear-producto.php" method="POST">
+        <form class="formulario-login" action="crear-producto.php" method="POST">
             <h2>Datos del Producto</h2>
 
             <?php if (!empty($error_mensaje)): ?>
@@ -81,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" id="nombre" name="nombre" required>
             </div>
             <div class="campo">
-                <label for="imagen">Ruta de Imagen (ej. src/img/...):</label>
+                <label for="imagen">Ruta de Imagen (ej. playeras/NOMBRE_IMG.jpeg):</label>
                 <input type="text" id="imagen" name="imagen">
             </div>
 
@@ -99,8 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="number" id="stock" name="stock" required>
             </div>
 
-            <button type="submit">Guardar Producto</button>
+            <button class="boton boton-amarillo" type="submit">Guardar Producto</button>
         </form>
     </main>
+
+    <footer class="footer-sesion">
+        <p class="copyright">Todos los derechos reservados. Juárez Herrera Erick Adrián &copy; </p>
+    </footer>
 </body>
 </html>

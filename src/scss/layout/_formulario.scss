@@ -14,7 +14,7 @@
     input[type="submit"] {
         display: block;     // Lo hacemos un bloque para que ocupe su propia línea
         width: 80%;         
-        margin: 1rem auto;  // 1rem arriba/abajo y 'auto' a los lados (esto lo centra)
+        margin: 2rem auto;  // 1rem arriba/abajo y 'auto' a los lados (esto lo centra)
     }
 
     @include mixins.tablet {
@@ -46,6 +46,12 @@
     input[type="email"] {
         display: inline-block; // Lo regresamos a 'inline' para que esté junto al input
         width: auto;          
+    }
+
+    button[type="submit"] {
+        display: inline; // Lo regresamos a 'inline' para que esté junto al input
+        width: auto;           // Le quitamos el ancho fijo
+        margin-top: 4rem;
     }
 
 }
