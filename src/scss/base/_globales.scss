@@ -21,6 +21,10 @@ body {
     min-height: 100vh;
 }
 
+.body-inventario{
+    background-color: variables.$grisClaro;
+}
+
 p {
     color: variables.$negro;
     font-size: 2.5rem;

@@ -54,3 +54,26 @@
     }
     
 }
+
+.header-inventario{
+
+    h1{
+        font-weight: variables.$bold;
+        margin-left: 20rem;
+        margin-right: 3rem;
+    }
+
+    display: flex;                  
+    justify-content: space-between; 
+    align-items: center;
+
+    .header-navegacion{
+        margin-right: 20rem;
+        margin-left: 2rem;
+    }
+}
+
+.header-crear-producto{
+    display: flex;
+    justify-content: center;
+}
