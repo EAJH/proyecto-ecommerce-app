@@ -1,12 +1,9 @@
 # ==========================================
 # ETAPA 1: El "Builder" 
 # ==========================================
-FROM node:18-alpine as gulp-builder
+FROM node:18 as gulp-builder
 
 WORKDIR /app
-
-# Instalar dependencias del sistema necesarias para compilar imágenes
-RUN apk add --no-cache autoconf automake libtool make tiff jpeg libpng zlib
 
 COPY . .
 
@@ -19,7 +16,7 @@ RUN npm install
 # Lo ideal es ejecutar la tarea de construcción única, usualmente 'build'.
 # Si no tienes tarea 'build', intenta: RUN npx gulp build
 # Por seguridad, probaremos ejecutar la tarea por defecto asumiendo que compila:
-RUN npx gulp build || npx gulp
+RUN npx gulp build
 
 # ==========================================
 # ETAPA 2: El Servidor Web (Tu servicio 'php')
