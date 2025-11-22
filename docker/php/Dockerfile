@@ -4,6 +4,10 @@
 FROM node:18-alpine as gulp-builder
 
 WORKDIR /app
+
+# Instalar dependencias del sistema necesarias para compilar imágenes
+RUN apk add --no-cache autoconf automake libtool make tiff jpeg libpng zlib
+
 COPY . .
 
 # 1. Instalar dependencias

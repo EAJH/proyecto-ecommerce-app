@@ -64,3 +64,6 @@ function watchArchivos() {
 exports.css = css;
 exports.watchArchivos = watchArchivos;
 exports.default = parallel(css, javascript, imagenes, versionWebp, watchArchivos); 
+
+// Crea una tarea específica que solo construya, sin quedarse observando
+exports.build = parallel(css, javascript, imagenes, versionWebp);
