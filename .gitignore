@@ -2,7 +2,7 @@
 /node_modules
 
 # Archivos compilados
-/build
+#/build
 
 # Archivos de sistema
 .DS_Store
