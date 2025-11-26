@@ -68,7 +68,7 @@ session_start(); // Siempre al inicio
     <section class="contenido-productos">
 
         <a href="productos.php" class="boton boton-amarillo">
-            Productos a la venta
+            Productos en venta
         </a>        
         
     </section> <!-- fin de la sección con enlace a la página de productos -->
